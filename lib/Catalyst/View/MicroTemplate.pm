@@ -3,7 +3,7 @@ use Moose;
 use Text::MicroTemplate::Extended;
 use namespace::clean -except => qw(meta);
 
-our $VERSION = '0.00001';
+our $VERSION = '0.00002';
 
 extends 'Catalyst::View';
 
@@ -116,7 +116,11 @@ sub process {
 
     $c->res->content_type( sprintf("%s; charset=%s", $self->content_type, $self->charset ) );
     $self->template->template_args( $c->stash );
-    $c->res->body( $self->render( $template, $c->stash ) );
+    my $body = $self->render( $template, $c->stash );
+    if (blessed $body && $body->can('as_string')) {
+        $body = $body->as_string;
+    }
+    $c->res->body( $body );
 }
 
 sub get_template_file {
